@@ -14,13 +14,14 @@ def get_all_todos(user_id=1):
         print(f"Error fetching todos: {response.status_code}")
         return []
 
-def create_todo(title, user_id=1):
+def create_todo(title, priority, user_id=1):
     """Create a new todo"""
     url = f"{BASE_URL}/todos"
     data = {
         "userId": user_id,
         "title": title,
-        "completed": False
+        "completed": False,
+        "priority": priority
     }
 
     response = requests.post(url, json=data)
@@ -70,14 +71,17 @@ def display_todos(todos):
     # Prepare data for table
     table_data = []
     for todo in todos:
-        status = "Done" if todo['completed'] else "   "
+        status = "Done" if todo['completed'] else "   " 
+        priority = todo.get('priority', "N/A") 
+        # not all todo will have priority. safely get value or fill in if blank.      
         table_data.append([
             todo['id'],
             status,
+            priority,
             todo['title']
         ])
 
-    headers = ["ID", "Done", "Task"]
+    headers = ["ID", "Done", "Priority", "Task"]
     print("\n" + tabulate(table_data, headers=headers, tablefmt="grid"))
 
 def filter_todo(filter_choice, user_id):
@@ -160,6 +164,12 @@ def main():
 
         elif choice == "2":
             title = input("Enter todo title: ")
+            while True:
+                priority = input(f'Enter priority (low / medium/ high): ')
+                if priority.lower() in ["low", "medium", "high"]:
+                    break
+                else:
+                    print("Please enter low, medium, or high")
             create_todo(title, user_id)
 
         elif choice == "3":
