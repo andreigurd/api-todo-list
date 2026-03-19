@@ -140,6 +140,44 @@ def edit_todo(todo_id):
         print(f"Failed to update: {response.status_code}")
         return None
 
+
+def search_todos(search_term, user_id):
+    """Search by keyword"""
+
+    todos = get_all_todos(user_id)
+
+    if not todos:
+        print("No todos found!")
+        return
+    
+    # make search term lower case
+    lowercase_search_term = search_term.lower()
+
+    table_data =[]
+    for todo in todos:
+        # make searchable fields lowercase
+        lowercase_title = todo['title'].lower()
+        status = todo.get('status', "N/A")
+        lowercase_status = status.lower()
+
+        if lowercase_search_term in lowercase_title or lowercase_search_term in lowercase_status:
+            # find matching todo and fill in blanks to avoid error
+            status = "Done" if todo['completed'] else " "
+            priority = todo.get('priority', "N/A")
+            table_data.append([
+            todo['id'],
+            status,
+            priority,
+            todo['title']
+        ])
+
+    if not table_data:
+        print(f'No todos found with "{search_term}" keyword.')
+
+    headers = ["ID", "Done", "Priority", "Task"]
+    print("\n" + tabulate(table_data, headers=headers, tablefmt="grid"))
+
+
 def main():
     """Main program loop"""
     user_id = 1
@@ -154,7 +192,8 @@ def main():
         print("4. Delete todo")
         print("5. Filter by complet/incomplete")
         print("6. Edit todo title")
-        print("7. Quit")
+        print("7. Search todo")
+        print("8. Quit")
 
         choice = input("\nChoose an option: ")
 
@@ -182,8 +221,8 @@ def main():
 
         elif choice == "5":            
             filter_choice = input("Enter [1] complet or [2] incomplete filter: ")
-            if filter_choice == "1" or filter == "2":            
-                filter_todo(filter, user_id)                
+            if filter_choice == "1" or filter_choice == "2":            
+                filter_todo(filter_choice, user_id)                
             else:
                 print("Enter option 1 or 2")
                 continue
@@ -192,7 +231,11 @@ def main():
             todo_id = input("Enter todo ID to edit: ")
             edit_todo(int(todo_id))
 
-        elif choice == "7":
+        elif choice == "7":            
+            search_term = input("Enter keyword to search by: ")                       
+            search_todos(search_term, user_id)             
+            
+        elif choice == "8":
             print("Goodbye!")
             break
 
