@@ -80,6 +80,43 @@ def display_todos(todos):
     headers = ["ID", "Done", "Task"]
     print("\n" + tabulate(table_data, headers=headers, tablefmt="grid"))
 
+def filter_todo(filter, user_id):
+    """Display complete/incomplete todos in a table"""
+    # [1] complet or [2] incomplete filter
+
+    todos = get_all_todos(user_id)
+
+    if not todos:
+        print("No todos found!")
+        return
+    
+    # Prepare data for table
+    table_data = []
+    if filter == "1":
+        for todo in todos:
+            if todo['completed']:        
+                status = "Done"
+                table_data.append([
+                    todo['id'],
+                    status,
+                    todo['title']
+                ])
+
+    if filter == "2":
+        for todo in todos:
+            if not todo['completed']:        
+                status = "Not Done"
+                table_data.append([
+                    todo['id'],
+                    status,
+                    todo['title']
+                ])
+    if not table_data:
+        print("No matching todos found.")         
+
+    headers = ["ID", "Done", "Task"]
+    print("\n" + tabulate(table_data, headers=headers, tablefmt="grid"))
+
 def main():
     """Main program loop"""
     user_id = 1
@@ -92,7 +129,8 @@ def main():
         print("2. Add todo")
         print("3. Mark todo complete")
         print("4. Delete todo")
-        print("5. Quit")
+        print("5. Filter by complet/incomplete")
+        print("6. Quit")
 
         choice = input("\nChoose an option: ")
 
@@ -112,7 +150,15 @@ def main():
             todo_id = input("Enter todo ID to delete: ")
             delete_todo(int(todo_id))
 
-        elif choice == "5":
+        elif choice == "5":            
+            filter = input("Enter [1] complet or [2] incomplete filter: ")
+            if filter == "1" or filter == "2":            
+                filter_todo(filter, user_id)                
+            else:
+                print("Enter option 1 or 2")
+                continue
+
+        elif choice == "6":
             print("Goodbye!")
             break
 
