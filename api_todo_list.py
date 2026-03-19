@@ -80,7 +80,7 @@ def display_todos(todos):
     headers = ["ID", "Done", "Task"]
     print("\n" + tabulate(table_data, headers=headers, tablefmt="grid"))
 
-def filter_todo(filter, user_id):
+def filter_todo(filter_choice, user_id):
     """Display complete/incomplete todos in a table"""
     # [1] complet or [2] incomplete filter
 
@@ -92,7 +92,7 @@ def filter_todo(filter, user_id):
     
     # Prepare data for table
     table_data = []
-    if filter == "1":
+    if filter_choice == "1":
         for todo in todos:
             if todo['completed']:        
                 status = "Done"
@@ -102,7 +102,7 @@ def filter_todo(filter, user_id):
                     todo['title']
                 ])
 
-    if filter == "2":
+    if filter_choice == "2":
         for todo in todos:
             if not todo['completed']:        
                 status = "Not Done"
@@ -117,6 +117,25 @@ def filter_todo(filter, user_id):
     headers = ["ID", "Done", "Task"]
     print("\n" + tabulate(table_data, headers=headers, tablefmt="grid"))
 
+def edit_todo(todo_id):
+    """Edit todo title"""
+
+    new_title = input(f'Enter new title for todo ID #{todo_id}: ')
+
+    url = f"{BASE_URL}/todos/{todo_id}"
+    data = {
+        "title": new_title
+    }
+
+    response = requests.patch(url, json=data)
+
+    if response.status_code == 200:
+        print(f"Updated todo {todo_id} title.")
+        return response.json()
+    else:
+        print(f"Failed to update: {response.status_code}")
+        return None
+
 def main():
     """Main program loop"""
     user_id = 1
@@ -130,7 +149,8 @@ def main():
         print("3. Mark todo complete")
         print("4. Delete todo")
         print("5. Filter by complet/incomplete")
-        print("6. Quit")
+        print("6. Edit todo title")
+        print("7. Quit")
 
         choice = input("\nChoose an option: ")
 
@@ -151,14 +171,18 @@ def main():
             delete_todo(int(todo_id))
 
         elif choice == "5":            
-            filter = input("Enter [1] complet or [2] incomplete filter: ")
-            if filter == "1" or filter == "2":            
+            filter_choice = input("Enter [1] complet or [2] incomplete filter: ")
+            if filter_choice == "1" or filter == "2":            
                 filter_todo(filter, user_id)                
             else:
                 print("Enter option 1 or 2")
                 continue
 
         elif choice == "6":
+            todo_id = input("Enter todo ID to edit: ")
+            edit_todo(int(todo_id))
+
+        elif choice == "7":
             print("Goodbye!")
             break
 
